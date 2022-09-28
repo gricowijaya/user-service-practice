@@ -134,5 +134,21 @@ module.exports = {
         } catch(err) {
             next(err);
         }
+    },
+
+    delete: async(req, res, next) => {
+        try {
+            const { email } = req.body
+
+            const deleteUser = await User.delete({where : { email }});
+
+            return res.status(201).json({
+                status: true, 
+                message: "Successfully deleted the User",
+                data: deleteUser
+            });
+        } catch(err) {
+            next(err);
+        }
     }
 }
