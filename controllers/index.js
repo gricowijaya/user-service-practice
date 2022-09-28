@@ -81,4 +81,58 @@ module.exports = {
             next(err);
         }
     },
+
+    updatePassword: async(req, res, next) => {
+        try {
+            const where = {}
+
+            const { id, email, old_password, new_password } = req.body;
+
+            if (id) { 
+                where.id = id;
+            }
+
+            if (email) {
+                where.email = email;
+            }
+
+            const user = await User.findOne({ where });
+
+
+            if (!user) {
+                return res.status(500).json({
+                    status: false, 
+                    message: "No User",
+                    data: null
+                });
+            }
+
+            const compare = bcrypt.compare(old_password, user.password);
+
+            if (!compare) {
+                return res.status(400).json({
+                    status:false,
+                    message: "Wrong old Password!",
+                    data: null
+                })
+            }
+
+            // ecnrypt the new password
+            const encrypt = await bcrypt.hash(new_password, 10);
+
+            const updatePassword = await User.update({password: encrypt},{
+                where : {
+                    email
+                } 
+            });
+
+            return res.status(201).json({
+                status: true, 
+                message: "Successfully update password",
+                data: updatePassword
+            });
+        } catch(err) {
+            next(err);
+        }
+    }
 }
